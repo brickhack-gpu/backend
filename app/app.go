@@ -44,6 +44,14 @@ func MakeTables(db *bun.DB) error {
 	if err != nil {
 		return err
 	}
+	_, err = db.NewCreateTable().Model((*model.Notification)(nil)).IfNotExists().Exec(ctx)
+	if err != nil {
+		return err
+	}
+	_, err = db.NewCreateTable().Model((*model.Template)(nil)).IfNotExists().Exec(ctx)
+	if err != nil {
+		return err
+	}
 	_, err = db.NewCreateTable().Model((*model.ServerConfig)(nil)).IfNotExists().Exec(ctx)
 	return err
 }
@@ -96,4 +104,8 @@ func (a *App) initializeRoutes() {
 	a.Router.Handle("/register", cor(http.HandlerFunc(router.Register))).Methods("OPTIONS", "POST")
 	a.Router.Handle("/login", cor(http.HandlerFunc(router.Login))).Methods("OPTIONS", "POST")
 	a.Router.Handle("/refresh", cor(http.HandlerFunc(router.RefreshToken))).Methods("OPTIONS", "POST")
+	a.Router.Handle("/profile", cor(router.AuthMiddleware(http.HandlerFunc(router.Profile)))).Methods("OPTIONS", "GET")
+	a.Router.Handle("/transactions", cor(router.AuthMiddleware(http.HandlerFunc(router.Transactions)))).Methods("OPTIONS", "GET")
+	a.Router.Handle("/products", cor(router.AuthMiddleware(http.HandlerFunc(router.Products)))).Methods("OPTIONS", "GET")
+	a.Router.Handle("/templates", cor(router.AuthMiddleware(http.HandlerFunc(router.Templates)))).Methods("OPTIONS", "GET")
 }
