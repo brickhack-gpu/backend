@@ -87,7 +87,7 @@ func (a *App) Run(addr string) {
 
 func (a *App) initializeRoutes() {
 	cor := cors.New(cors.Options{
-		AllowedOrigins:   []string{"https://test.local", "http://localhost:5173"},
+		AllowedOrigins:   []string{"https://unbolted.co", "http://localhost:5173"},
 		AllowCredentials: true,
 		AllowedMethods: []string{
 			http.MethodGet,
