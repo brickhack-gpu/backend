@@ -18,15 +18,17 @@ type Router struct {
 	JwtSecret     string
 	StripeSecret  string
 	StripeWebhook string
+	GCPComputeKey string
 	Dev           bool
 }
 
-func NewRouter(db *bun.DB, jwtSecret, stripeSecret, stripeWebhook string, dev bool) *Router {
+func NewRouter(db *bun.DB, jwtSecret, stripeSecret, stripeWebhook, GCPComputeKey string, dev bool) *Router {
 	return &Router{
 		DB:            db,
 		JwtSecret:     jwtSecret,
 		StripeSecret:  stripeSecret,
 		StripeWebhook: stripeWebhook,
+		GCPComputeKey: GCPComputeKey,
 		Dev:           dev,
 	}
 }

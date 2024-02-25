@@ -15,6 +15,7 @@ import (
 
 	"gpu/model"
 	"gpu/routes"
+    "gpu/scan"
 )
 
 type App struct {
@@ -23,6 +24,7 @@ type App struct {
 	JwtSecret     string
 	StripeSecret  string
 	StripeWebhook string
+	GCPComputeKey string
 	DEV           bool
 }
 
@@ -56,7 +58,7 @@ func MakeTables(db *bun.DB) error {
 	return err
 }
 
-func (a *App) Initialize(user, password, dbname, jwtSecret, stripeSecret, stripeWebhook string, dev bool) {
+func (a *App) Initialize(user, password, dbname, jwtSecret, stripeSecret, stripeWebhook, gcpComputeKey string, dev bool) {
 	connectionString := fmt.Sprintf("postgres://%s:%s@localhost:5432/%s?sslmode=disable", user, password, dbname)
 
 	sqldb := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(connectionString)))
@@ -67,10 +69,13 @@ func (a *App) Initialize(user, password, dbname, jwtSecret, stripeSecret, stripe
 		log.Fatal(err)
 	}
 
+    go scan.ScanBalance(a.DB)
+
 	a.Router = mux.NewRouter()
 	a.JwtSecret = jwtSecret
 	a.StripeSecret = stripeSecret
 	a.StripeWebhook = stripeWebhook
+	a.GCPComputeKey = gcpComputeKey
 	a.DEV = dev
 
 	a.initializeRoutes()
@@ -99,7 +104,7 @@ func (a *App) initializeRoutes() {
 		},
 	}).Handler
 
-	router := routes.NewRouter(a.DB, a.JwtSecret, a.StripeSecret, a.StripeWebhook, a.DEV)
+	router := routes.NewRouter(a.DB, a.JwtSecret, a.StripeSecret, a.StripeWebhook, a.GCPComputeKey, a.DEV)
 
 	a.Router.Handle("/register", cor(http.HandlerFunc(router.Register))).Methods("OPTIONS", "POST")
 	a.Router.Handle("/login", cor(http.HandlerFunc(router.Login))).Methods("OPTIONS", "POST")
@@ -108,4 +113,9 @@ func (a *App) initializeRoutes() {
 	a.Router.Handle("/transactions", cor(router.AuthMiddleware(http.HandlerFunc(router.Transactions)))).Methods("OPTIONS", "GET")
 	a.Router.Handle("/products", cor(router.AuthMiddleware(http.HandlerFunc(router.Products)))).Methods("OPTIONS", "GET")
 	a.Router.Handle("/templates", cor(router.AuthMiddleware(http.HandlerFunc(router.Templates)))).Methods("OPTIONS", "GET")
+	a.Router.Handle("/search", cor(router.AuthMiddleware(http.HandlerFunc(router.Search)))).Methods("OPTIONS", "GET")
+	a.Router.Handle("/data", cor(router.AuthMiddleware(http.HandlerFunc(router.Data)))).Methods("OPTIONS", "GET")
+
+	a.Router.Handle("/servers/start", cor(router.AuthMiddleware(http.HandlerFunc(router.SpinServer)))).Methods("OPTIONS", "POST")
+	a.Router.Handle("/servers/destroy", cor(router.AuthMiddleware(http.HandlerFunc(router.KillServer)))).Methods("OPTIONS", "POST")
 }

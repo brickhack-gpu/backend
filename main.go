@@ -19,6 +19,7 @@ func main() {
 		os.Getenv("JWT_SECRET"),
 		os.Getenv("STRIPE_SECRET"),
 		os.Getenv("STRIPE_WEBHOOK"),
+		os.Getenv("GCP_COMPUTE_API_KEY"),
 		os.Getenv("DEV") == "true")
 
 	a.Run(":8080")

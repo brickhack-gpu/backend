@@ -9,10 +9,10 @@ import (
 type Deposit struct {
 	bun.BaseModel `bun:"table:deposits"`
 
-    ID        int64     `bun:"id,pk,autoincrement" json:"id"`
-    Amount    float64   `bun:",notnull" json:"amount"`
-    Status    string    `bun:",notnull" json:"status"`
-    CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
+	ID        int64     `bun:"id,pk,autoincrement" json:"id"`
+	Amount    float64   `bun:",notnull" json:"amount"`
+	Status    string    `bun:",notnull" json:"status"`
+	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
 
 	UserID int64 `bun:",notnull"`
 	User   *User `bun:"rel:belongs-to,join:user_id=id"`
@@ -21,10 +21,10 @@ type Deposit struct {
 type Purchase struct {
 	bun.BaseModel `bun:"table:purchases"`
 
-    ID        int64     `bun:"id,pk,autoincrement" json:"id"`
-    Amount    float64   `bun:",notnull" json:"amount"`
-    Status    string    `bun:",notnull" json:"status"`
-    CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
+	ID        int64     `bun:"id,pk,autoincrement" json:"id"`
+	Amount    float64   `bun:",notnull" json:"amount"`
+    Status    string    `bun:"default:'complete',notnull" json:"status"`
+	CreatedAt time.Time `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
 
 	UserID    int64    `bun:",notnull"`
 	User      *User    `bun:"rel:belongs-to,join:user_id=id"`
