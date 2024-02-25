@@ -26,7 +26,7 @@ func GenerateJWT(username string, userid int64, admin bool, jwtSecret string) (s
 	jwtSecretBytes := []byte(jwtSecret)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub":      userid,
-		"exp":      time.Now().Add(15 * time.Minute).Unix(), // TODO: Refresh tokens
+		"exp":      time.Now().Add(48 * time.Hour).Unix(), // TODO: Refresh tokens
 		"username": username,
 		"admin":    admin,
 	})
@@ -38,7 +38,7 @@ func GenerateJWT(username string, userid int64, admin bool, jwtSecret string) (s
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userid,
-		"exp": time.Now().Add(48 * time.Hour).Unix(),
+		"exp": time.Now().Add(96 * time.Hour).Unix(),
 	})
 
 	refreshTokenString, err := refreshToken.SignedString(jwtSecretBytes)
@@ -72,7 +72,7 @@ func GenerateJWTFromRefreshToken(db *bun.DB, jwtSecret string, rt string, ctx co
 			jwtSecretBytes := []byte(jwtSecret)
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 				"sub":      user.ID,
-				"exp":      time.Now().Add(15 * time.Minute).Unix(), // TODO: Refresh tokens
+				"exp":      time.Now().Add(48 * time.Minute).Unix(), // TODO: Refresh tokens
 				"username": user.Username,
 				"admin":    user.Admin,
 			})

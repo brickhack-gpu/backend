@@ -43,6 +43,11 @@ func (router *Router) SpinServer(w http.ResponseWriter, r *http.Request) {
 		return
     }
 
+    if uid != 1 {
+		util.ResError(err, w, http.StatusBadRequest, "Insufficent balance.")
+		return
+    }
+
     template := model.Template{
         ID: req.TemplateID,
     }
@@ -88,7 +93,7 @@ func (router *Router) SpinServer(w http.ResponseWriter, r *http.Request) {
             product.Status = "failed"
             return
         } else {
-            product.Status = "active"
+            product.Status = "building"
             ip, err := util.GetInstanceIP("siggpu", serverConfig.Zone, gcpId)
             if err != nil {
                 log.Println(err)
@@ -99,6 +104,15 @@ func (router *Router) SpinServer(w http.ResponseWriter, r *http.Request) {
         _, err = router.DB.NewUpdate().Model(&product).Where("gcp_id = ?", gcpId).Exec(ctx)
         if err != nil {
             panic(err)
+        }
+
+        if product.Status == "building" {
+            time.Sleep(10)
+            product.Status = "active"
+            _, err = router.DB.NewUpdate().Model(&product).Where("gcp_id = ?", gcpId).Exec(ctx)
+            if err != nil {
+                panic(err)
+            }
         }
     }()
 
@@ -156,6 +170,12 @@ func (router *Router) KillServer(w http.ResponseWriter, r *http.Request) {
             panic(err)
         }
     }()
+
+    product.Status = "destroying"
+    _, err = router.DB.NewUpdate().Model(product).Where("gcp_id = ?", req.GCPId).Exec(ctx)
+    if err != nil {
+        panic(err)
+    }
 
 	res := SpinServerRes{
 		Success:      true,

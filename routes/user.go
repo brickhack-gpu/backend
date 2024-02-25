@@ -98,7 +98,9 @@ func (router *Router) Products(w http.ResponseWriter, r *http.Request) {
 	user := model.User{
 		ID: uid,
 	}
-	err := router.DB.NewSelect().Model(&user).WherePK().Relation("Products").OrderExpr("created_at DESC").Scan(ctx)
+	err := router.DB.NewSelect().Model(&user).WherePK().Relation("Products", func(q *bun.SelectQuery) *bun.SelectQuery {
+        return q.Relation("ServerConfig")
+    }).OrderExpr("created_at DESC").Scan(ctx)
     log.Println(user)
 	if err != nil {
 		util.ResError(err, w, http.StatusBadRequest, "Database error.")

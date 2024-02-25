@@ -30,6 +30,9 @@ func validUsername(username string) bool {
 }
 
 func (router *Router) Register(w http.ResponseWriter, r *http.Request) {
+    util.ResError(nil, w, http.StatusBadRequest, "Registration disabled for BrickHack")
+    return
+
 	var req RegisterReq
 	ctx := context.Background()
 
